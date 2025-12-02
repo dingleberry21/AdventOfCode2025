@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "Bnsparser.h"
 
 /* ======== GENERIC GLOBALS ======== */
@@ -157,7 +158,15 @@ file* bnsreadf(FILE *fp) {
     return File_new(first_line, lines_count);
 }
 
-token** bnstokenise(line *ln) {
+bool validate_separator(char c, char *separators_string) {
+    for (size_t i = 0; i < strlen(separators_string); i++) { // better not make it fail, LMAO. Pray for it to have a null-terminator
+        if (c == separators_string[i]) return true;
+    }
+
+    return false;
+}
+
+token** bnstokenise(line *ln, char *separators_string) {// Separators MUST be null terminated
     size_t tokenbuff_capacity = TOKENBUFF_DEFAULT_SIZE;
     token **tokenbuff = (token **)xmalloc(tokenbuff_capacity * sizeof(token *));
     token *first_token = nullptr;
@@ -166,7 +175,7 @@ token** bnstokenise(line *ln) {
     size_t last = 0;
     bool empty = true; // used for token-emptyness-check; starting from the assumption it is empty
     for (size_t i = 0; i < ln->length; i++) {
-        if (ln->buff[i] <= 32 || ln->buff[i] > 126 || i == ln->length-1) { // creating token
+        if (i == ln->length-1 || validate_separator(ln->buff[i], separators_string)) { // creating token
             // printf("[[Caught token at index %zu (length: %zu)]]\n", i, i-last);
             
             if (i == last) continue; // since at some point we set last = i+1, so that white spaces aren't caught

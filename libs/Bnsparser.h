@@ -57,11 +57,14 @@ typedef struct token { // `token` object. Does NOT have v-table
     struct token *next;
 } token;
 
-/* Returns an array of tokens from a given `line` */
-token** bnstokenise(line *ln);
+/* Returns an array of tokens from a given `line` and a separtor string (MUST BE NULL-TERMINATED!) */
+token** bnstokenise(line *ln, char *separator_string);
 
 /* Prints the passed token `T`'s buffer to `stdout`. */
 void bnsprinttkn(token *T);
 
 /* Compares 2 given tokens. */
 bool bnscmptkn(token *T1, token *T2);
+
+/* Checks if the passed character (NOT string) is a separator */
+bool validate_separator(char c, char *separators_string);
