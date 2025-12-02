@@ -2,9 +2,6 @@
 #include "../libs/Bnsparser.h"
 #include <stdbool.h>
 
-/* For solving this problem I used my custom parsing library (Bnsparser.c) */
-/* Find it at: https://github.com/dingleberry21/Bnsparser */
-
 unsigned int power(unsigned int base, unsigned int exp) {
     unsigned int result = 1;
     for (unsigned int i = 0; i < exp; i++) {
@@ -14,7 +11,7 @@ unsigned int power(unsigned int base, unsigned int exp) {
 }
 
 int main(void) {
-    char *filename = "Inputs/Problem1.txt"; // uses the same txt as part 1
+    char *filename = "Inputs/Problem1.txt";
     FILE *fp = fopen(filename, "r");
     if (!fp) return -1;
 
@@ -30,19 +27,26 @@ int main(void) {
         for (unsigned int i = 1; i < F->current->length; i++) {
             rot += (F->current->buff[i] - 48)*power(10, F->current->length-i-1);
         }
-        if (F->current->buff[0] == 'R') {
-            pos += rot;
-        } else {
-            pos -= rot;
-        }
         
-        pos = pos % 100;
-        if (pos < 0) {
-            pos = 100 + pos;
-        }
-
-        if (pos == 0) {
-            psswd++;
+        if (F->current->buff[0] == 'R') {
+            int first_zero_dist = (100 - pos) % 100;
+            if (first_zero_dist == 0) first_zero_dist = 100;
+            
+            if (rot >= first_zero_dist) {
+                psswd += 1 + (rot - first_zero_dist) / 100;
+            }
+            
+            pos = (pos + rot) % 100;
+        } else {
+            int first_zero_dist = pos;
+            if (first_zero_dist == 0) first_zero_dist = 100;
+            
+            if (rot >= first_zero_dist) {
+                psswd += 1 + (rot - first_zero_dist) / 100;
+            }
+            
+            pos = (pos - rot) % 100;
+            if (pos < 0) pos += 100;
         }
 
         status = F->vt->next(F);
