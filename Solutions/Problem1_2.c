@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "libs/Bnsparser.h"
+#include "../libs/Bnsparser.h"
 #include <stdbool.h>
 
 /* For solving this problem I used my custom parsing library (Bnsparser.c) */
@@ -14,7 +14,7 @@ unsigned int power(unsigned int base, unsigned int exp) {
 }
 
 int main(void) {
-    char *filename = "aoc.txt";
+    char *filename = "Inputs/Problem1.txt"; // uses the same txt as part 1
     FILE *fp = fopen(filename, "r");
     if (!fp) return -1;
 

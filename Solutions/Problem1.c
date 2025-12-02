@@ -16,10 +16,10 @@ unsigned int power(unsigned int base, unsigned int exp) {
 }
 
 int main(void) {
-    char *filename = "../Inputs/Problem1.txt";
+    char *filename = "Inputs/Problem1.txt";
     FILE *fp = fopen(filename, "r");
     if (!fp) return -1;
-    
+
     file *F = bnsreadf(fp);
     bool status = true;
     int pos = 50;
