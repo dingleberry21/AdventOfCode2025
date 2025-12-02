@@ -112,11 +112,17 @@ int main(void) {
         // lerping from is L. We now need, though, a way to get R. We must find a way to split `min` in 2 halves.
         // Being `min_digits` known, we can divide by 10 with size_t numbers *min_digits/2* times, so that we 
         // remains with the left side.
-        
         size_t start = min;
         for (size_t i = 0; i < min_digits/2; i++) {
             start /= 10;
-        }
+        } // in the end, start equals L, and we can use it for finding symmetries.
+        // Just to be even more clear:
+        // if we have a number abcd, it's clear that the minimum number fitting in abcd will be
+        // 1000a + 100b + 10c + d, but the minimum SYMMETRICAL number will necessarily be:
+        // abab = 1000a + 100b + 10a + b. To convince yourself try and see what happens if
+        // from abcd we start from cdcd or a(b-1)a(b-1).
+        // In the first case we can either have a number below the minimum (cd < ab) or
+        // above (cd > ab), effectively losing some symmetrical ones.
 
         // 5. We slowly increment start and "duplicate" it over to the other side. We work as if we were on the right one.
         size_t R = start; // used to save the right side and sum it when recomposing the full symmetric number
