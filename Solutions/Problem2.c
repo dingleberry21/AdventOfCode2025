@@ -121,8 +121,8 @@ int main(void) {
         // 1000a + 100b + 10c + d, but the minimum SYMMETRICAL number will necessarily be:
         // abab = 1000a + 100b + 10a + b. To convince yourself try and see what happens if
         // from abcd we start from cdcd or a(b-1)a(b-1).
-        // In the first case we can either have a number below the minimum (cd < ab) or
-        // above (cd > ab), effectively losing some symmetrical ones.
+        // In the first case we can either have a number below the minimum (cd < ab),
+        // that is useless, or above (cd > ab), effectively losing some symmetrical ones.
 
         // 5. We slowly increment start and "duplicate" it over to the other side. We work as if we were on the right one.
         size_t R = start; // used to save the right side and sum it when recomposing the full symmetric number
