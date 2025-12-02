@@ -78,11 +78,14 @@ int main(void) {
     while (current) {
         token **subtokensbuff = subtokeniser(current, "-"); //always gives us 2 str tokens: min and max
         
-        // 1. get the length of the number strings 
+        // 1. get the length of the number strings - if you don't want to go through
+        // the tokenisation system, believe me this works just fine
         min_digits = subtokensbuff[0]->length;
         max_digits = subtokensbuff[1]->length;
 
-        // 2. convert them to numbers
+        // 2. convert them to numbers by first taking the chars and getting the raw num
+        // out of the representation via an offset = 48. The numbers are progressively multiplied by
+        // a multiple of 10, to compose the actual entire number 
         for (unsigned int i = 1; i < subtokensbuff[0]->length; i++) {
             min += (subtokensbuff[0]->buff[0] - 48)*power(10, subtokensbuff[0]->length-i);
         }
@@ -91,10 +94,13 @@ int main(void) {
         }
 
         // 3. we need to start and end where we can operate: a number with an even amount of digits
+        // E.g. if we have the range 101 - 1040, there is no point in evaluating 101-999, since we will
+        // never have a pair of equal halves. Instead, we straight up jump to 10^3
+        // (that is 10^(digits_of_the_lower_bound + 1))
         if (min_digits % 2 != 0) {
             min = power(10, min_digits+1); // upgrading to biggest number with an even amount of digits in the range
         }
-        if (max_digits % 2 != 0) {
+        if (max_digits % 2 != 0) { // something similar but downwards for the upper boundary
             max = power(10, max_digits)-1; // downgrading
         }
 
