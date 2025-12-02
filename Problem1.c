@@ -1,6 +1,9 @@
 #include <stdio.h>
-#include "Bnsparser.h"
+#include "libs/Bnsparser.h"
 #include <stdbool.h>
+
+/* For solving this problem I used my custom parsing library (Bnsparser.c) */
+/* Find it at: https://github.com/dingleberry21/Bnsparser */
 
 unsigned int power(unsigned int base, unsigned int exp) {
     unsigned int result = 1;
