@@ -129,7 +129,8 @@ int main(void) {
         while (true) {
             if (min_digits % 2 != 0) { // we gotta skip uneven nums
                 min_digits++;
-                R = power(10, min_digits/2);
+                R = power(10, min_digits/2); // making R jump to the next lowest 
+                // number with an even amount of digits
             }
             
             // notice we check also if it's greater than min, because we are not sure first ones really are.
