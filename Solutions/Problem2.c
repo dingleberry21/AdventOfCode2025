@@ -70,11 +70,11 @@ int main(void) {
     token **tokensbuff = bnstokenise(F->first, ","); // comma-separated pairs
 
     token *current = tokensbuff[0]; // starting from first token
-    size_t counter = 0;
-    size_t min = 0;
-    size_t max = 0;
-    unsigned int min_digits = 0;
-    unsigned int max_digits = 0;
+    size_t counter = 0; // final result
+    size_t min = 0; // INITIALLY stores the LOWER boundary of the range 
+    size_t max = 0; // INITIALLY stores the UPPER boundary of the range
+    unsigned int min_digits = 0; // digits of the lower boundary
+    unsigned int max_digits = 0; // digits of the upper boudary
     while (current) {
         token **subtokensbuff = subtokeniser(current, "-"); //always gives us 2 str tokens: min and max
         
@@ -119,48 +119,24 @@ int main(void) {
                 min_digits++;
                 R = power(10, min_digits/2);
             }
-
+            
             // notice we check also if it's greater than min, because we are not sure first ones really are.
             // E.g. min = 3234; start = 32; symmetric = 3232 < min
-            if ((R*power(10, min_digits/2) + R) < max && (R*power(10, min_digits/2) + R) > min) {
-                counter+=R*power(10, min_digits/2) + R; // we have found a symmetric number that's in the range
+            size_t symmetric = R*power(10, min_digits/2) + R;
+            if (symmetric < max && symmetric > min) {
+                counter += symmetric ; // we have found a symmetric number that's in the range
+            } else if (symmetric < min) {
+                R++;
+                continue;
             } else {
                 break;
             }
-
+            
             // gradually updates `min_digits` by getting the amount of bits and subtracting the most significant zeroes,
             // then divides by log2(10) and casts to int to have an int, adds 1 to complete.
             R++;
             min_digits = (int)((sizeof(counter)*8 - __builtin_clzll(counter))/log2(10)) + 1;
         }
-
-        // Here below I wanted to manipualted straight up the strings, then I realised that'd be stupid since the moment we pass from a length of x
-        // to a lenght of x+1 we need to realloc the string, and besides being harder to do than above, it's a waste of resources,
-        // I think. Ignore what follows. I decided to leave it because it might even be fun trying to implement it (won't happen - LOL).
-
-        // if (min_digits % 2 != 0) {
-        //     min = power(10, min_digits+1);
-
-        //     char *newMinBuff = (char *)xmalloc(sizeof(char)*subtokensbuff[0]->length+1);
-
-        //     // extending the number in the buffer
-        //     newMinBuff[0] = '1';
-        //     memcpy(newMinBuff+1, subtokensbuff[0]->buff, subtokensbuff[0]->length); // hard copy
-        //     free(subtokensbuff[0]->buff); // bye bye
-        //     subtokensbuff[0]->buff = newMinBuff;
-        //     subtokensbuff[0]->length = subtokensbuff[0]->length+1;
-        // }
-        // if (max_digits % 2 != 0) {
-        //     min = power(10, max_digits-1);
-
-        //     char *newMinBuff = (char *)xmalloc(sizeof(char)*subtokensbuff[1]->length+1);
-
-        //     newMinBuff[0] = '1';
-        //     memcpy(newMinBuff+1, subtokensbuff[1]->buff, subtokensbuff[1]->length);
-        //     free(subtokensbuff[1]->buff);
-        //     subtokensbuff[1]->buff = newMinBuff;
-        //     subtokensbuff[1]->length = subtokensbuff[0]->length+1;
-        // }
 
         min = max = 0;
         current = current->next;
