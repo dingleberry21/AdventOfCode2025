@@ -8,7 +8,11 @@
 
 /* Problem 2 of the Advent of Code 2025 challenge. */
 /* My original solution hasn't worked. Asked Claude to fix it. I am ABSOLUTE ASHAMED
-for the way I've treated the challenge. */
+for the way I've treated the challenge. I was close to the answer but still couldn't manage
+to finish it because of some more or less serious bugs. After a day of debugging I realised
+I was not able to fix it, it was too chaotic. Before deletion I wanted to check if an LLM
+was able to fix this, given that also other humans couldn't help with the mess I made.
+Claude Sonnet did the job. Gemini, on the other side, is absolutely stupid. */
 
 #define DEFAULT_SUBTOKENSBUFF_COUNT 10
 
