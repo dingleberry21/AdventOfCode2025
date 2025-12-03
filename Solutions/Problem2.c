@@ -6,14 +6,9 @@
 #include <stdlib.h>
 #include "../libs/Bnsparser.h"
 
-/* NOTE: NOT functional. Work in progress. */
-
 /* Problem 2 of the Advent of Code 2025 challenge. */
-/* As of today (02/12/2025) my Bnsparser doesn't have a token sub-parser, so I can't
-get sub-strings from tokens the same way I do with lines when I tokenise them.
-I'm building here a custom function that'll do the job.
-
-For infos on my tokeniser, see Problem1.c, where I've included the link to the latest page. */
+/* My original solution hasn't worked. Asked Claude to fix it. I am ABSOLUTE ASHAMED
+for the way I've treated the challenge. */
 
 #define DEFAULT_SUBTOKENSBUFF_COUNT 10
 
@@ -24,7 +19,8 @@ Since I mean to change the final implementation, this one will be simplified,
 so that we won't care about assigning correct the `.next` field in the token struct,
 since in any case for the scope of this challenge we always need to access to elements:
 `subtokensbuff[0]` and `subtokensbuff[1]`. */
-token** subtokeniser( token *T, char *separators_string ) {
+token**
+subtokeniser( token *T, char *separators_string ) {
     size_t subtokens = DEFAULT_SUBTOKENSBUFF_COUNT;
     token **subtokensbuff = ( token** )xmalloc( sizeof(token *)*subtokens );
     
@@ -35,12 +31,10 @@ token** subtokeniser( token *T, char *separators_string ) {
         
         // capture the sub-token
         if ( i == T->length - 1 || validate_separator( T->buff[i], separators_string ) ) {
-            // TODO: in the repo of the bnsparser remember to check for empty subtokens, so that they're not considered
-
             token *subT = ( token * )xmalloc( sizeof( token ) );
             subT->buff = &T->buff[ last ];
             subT->length = ( i == T->length-1 ) ? i - last + 1 : i - last;
-            subT->next = nullptr; // TODO - in the Bnsparser repo
+            subT->next = nullptr;
 
             subtokensbuff[ pos++ ] = subT; // positioning in the buffer
 
@@ -51,7 +45,8 @@ token** subtokeniser( token *T, char *separators_string ) {
     return subtokensbuff;
 }
 
-unsigned int power( unsigned int base, unsigned int exp ) {
+unsigned int
+power( unsigned int base, unsigned int exp ) {
     unsigned int result = 1;
     for ( unsigned int i = 0; i < exp; i++ ) {
         result *= base;
@@ -71,82 +66,75 @@ int main(void) {
 
     token *current = tokensbuff[0]; // starting from first token
     size_t counter = 0; // final result
-    size_t min = 0; // INITIALLY stores the LOWER boundary of the range 
-    size_t max = 0; // INITIALLY stores the UPPER boundary of the range
-    unsigned int min_digits = 0; // digits of the lower boundary
-    unsigned int max_digits = 0; // digits of the upper boudary
+    
     while ( current ) {
         token **subtokensbuff = subtokeniser(current, "-"); //always gives us 2 str tokens: min and max
         
-        // 1. get the length of the number strings - if you don't want to go through
-        // the tokenisation system, believe me this works just fine
-        min_digits = subtokensbuff[ 0 ]->length;
-        max_digits = subtokensbuff[ 1 ]->length;
+        // 1. get the length of the number strings
+        unsigned int min_digits = subtokensbuff[ 0 ]->length;
+        unsigned int max_digits = subtokensbuff[ 1 ]->length;
 
-        // 2. convert them to numbers by first taking the chars and getting the raw num
-        // out of the representation via an offset = 48. The numbers are progressively multiplied by
-        // a multiple of 10, to compose the actual entire number 
-        for ( unsigned int i = 1; i < subtokensbuff[0]->length; i++ ) {
-            min += (subtokensbuff[0]->buff[0] - 48)*power(10, subtokensbuff[0]->length-i);
+        // 2. convert them to numbers - FIXED
+        size_t min = 0;
+        size_t max = 0;
+        for ( unsigned int i = 0; i < subtokensbuff[0]->length; i++ ) {
+            min = min * 10 + (subtokensbuff[0]->buff[i] - '0');
         }
-        for ( unsigned int i = 1; i < subtokensbuff[0]->length; i++ ) {
-            max += (subtokensbuff[1]->buff[0] - 48)*power(10, subtokensbuff[1]->length-i);
+        for ( unsigned int i = 0; i < subtokensbuff[1]->length; i++ ) {
+            max = max * 10 + (subtokensbuff[1]->buff[i] - '0');
         }
 
         // 3. we need to start and end where we can operate: a number with an even amount of digits
-        // E.g. if we have the range 101 - 1040, there is no point in evaluating 101-999, since we will
-        // never have a pair of equal halves. Instead, we straight up jump to 10^3
-        // (that is 10^(digits_of_the_lower_bound + 1))
         if ( min_digits % 2 != 0 ) {
-            min = power(10, min_digits+1); // upgrading to biggest number with an even amount of digits in the range
+            min = power(10, min_digits); // upgrading to biggest number with an even amount of digits in the range
+            min_digits++;
         }
-        if ( max_digits % 2 != 0 ) { // something similar but downwards for the upper boundary
-            max = power(10, max_digits)-1; // downgrading
+        if ( max_digits % 2 != 0 ) {
+            max = power(10, max_digits) - 1; // downgrading
+            max_digits--;
         }
 
-        // 4. left half must be equal to right one at all times; we must constantly check if the half we're 
-        // lerping, when repeated, is still in the valid range.
-        // Supposing we have a number as follows: L | R, where L is the left half and R is the right half, 
-        // so that the number of digits in L equals half of the digits of L+R.
-        // We know that digits can repeat ONLY when R = L. This is our starting condition. The number we start
-        // lerping from is L. We now need, though, a way to get R. We must find a way to split `min` in 2 halves.
-        // Being `min_digits` known, we can divide by 10 with size_t numbers *min_digits/2* times, so that we 
-        // remains with the left side.
+        // 4. Calculate starting left half
         size_t start = min;
         for (size_t i = 0; i < min_digits/2; i++) {
             start /= 10;
-        } // in the end, start equals L, and we can use it for finding symmetries.
-        // Just to be even more clear:
-        // if we have a number abcd, it's clear that the minimum number fitting in abcd will be
-        // 1000a + 100b + 10c + d, but the minimum SYMMETRICAL number will necessarily be:
-        // abab = 1000a + 100b + 10a + b. To convince yourself try and see what happens if
-        // from abcd we start from cdcd or a(b-1)a(b-1).
-        // In the first case we can either have a number below the minimum (cd < ab),
-        // that is useless, or above (cd > ab), effectively losing some symmetrical ones.
-
-        // 5. We slowly increment start and "duplicate" it over to the other side. We work as if we were on the right one.
-        size_t R = start; // used to save the right side and sum it when recomposing the full symmetric number
-        
-        while ( true ) {            
-            // notice we check also if it's greater than min, because we are not sure first ones really are.
-            // E.g. min = 3234; start = 32; symmetric = 3232 < min
-            size_t symmetric = R*power( 10, min_digits/2 ) + R;
-            if ( symmetric > min && symmetric < max ) {
-                // printf("Caught: %zu\tMin: %zu\tMax: %zu\tMin digits: %u\n", symmetric, min, max, min_digits);
-                counter += symmetric ; // we have found a symmetric number that's in the range
-                R++;
-            } else if ( symmetric < min ) {
-                R++;
-                continue;
-            } else if ( symmetric > max ) {
-                break;
-            }
         }
 
-        min = max = 0;
+        // 5. Main loop - iterate through symmetric numbers
+        size_t R = start;
+        size_t current_digits = min_digits;
+        
+        printf( "Range: %zu - %zu (digits: %u - %u); Start half: %zu\n", min, max, min_digits, max_digits, start );
+        
+        while ( true ) {
+            // Check if we need to move to next digit length
+            size_t max_for_current_digits = power(10, current_digits/2) - 1;
+            if (R > max_for_current_digits) {
+                current_digits += 2;
+                if (current_digits > max_digits) break;
+                R = power(10, current_digits/2 - 1);
+            }
+            
+            // Build symmetric number: R concatenated with itself
+            size_t symmetric = R * power(10, current_digits/2) + R;
+            
+            // If we've exceeded the max, we're done with this range
+            if (symmetric > max) {
+                break;
+            }
+            
+            // If symmetric number is in valid range, add it to counter
+            if (symmetric >= min) {
+                // printf("Hit: %zu\n", symmetric);
+                counter += symmetric;
+            }
+            
+            R++;
+        }
+
         current = current->next;
     }
 
-    printf("-------- INVALID CHARS COUNT --------\n%zu\n-------- END --------\n", counter);
+    printf("-------- INVALID IDS SUM --------\n%zu\n-------- END --------\n", counter);
     return 0;
 }
