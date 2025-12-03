@@ -29,12 +29,13 @@ int main(void) {
                 int current_joltage = 10 * d1 + d2;
                 
                 if ( current_joltage > max_joltage ) {
+                    printf("%i\n", current_joltage);
+                    result += current_joltage;
                     max_joltage = current_joltage;
                 }
             }
         }
-        
-        result += max_joltage;
+
         current = current->next;
     }
 
