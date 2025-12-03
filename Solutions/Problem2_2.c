@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include "../libs/Bnsparser.h"
 
+/* NOT COMPLETE */
+
 /* Problem 2 part 2 of the Advent of Code 2025 challenge. */
 /* Tokeniser used: Bnsparser. Check out Problem 1 for more infos and a link. */
 
@@ -56,6 +58,26 @@ is_prime(int n) {
     return false;
 }
 
+/* Returns the first `digits_to_extract` most significant figures from N, with N having `total_digits` figures. */
+int
+get_digits( size_t N, unsigned int total_digits, unsigned int digits_to_extract ) {
+    for ( unsigned int i = 0; i < total_digits - digits_to_extract; i++ ) {
+        N /= 10;
+    }
+
+    return N;
+}
+
+/* Replicates a number N of `N_digits` figures in a number of `final_digits` figures, if possible. Returns 0 if unsuccessful.  */
+size_t
+replicate( unsigned int N, unsigned int N_digits, unsigned int final_digits ) {
+    unsigned int final = 0;
+    unsigned int exp = final_digits / N_digits;
+    for ( unsigned int i = 0; i < final_digits; i += exp ) {
+        N  += N*power(10, i);
+    }
+}
+
 int main(void) {
     FILE *fp = fopen( "Inputs/Problem2.txt", "r" );
     if ( !fp ) return -1;
@@ -90,41 +112,11 @@ int main(void) {
         // So it's clear the possibilities depend on the divisors of the number of digits.
         // Ideally: We divide the number of digits by all the possible divisors, and get the size of the module that will be repeated, of length: digits(N)/divisor
         
-        
-        for ( unsigned int current_digits = min_digits; current_digits < max_digits; current_digits++ ) {
-            if ( is_prime( current_digits ) && max_digits > min_digits ) { // if prime we go to the next digit
-                current_digits++;
-                counter++; // on, suppose, 5 digits, only possible sequence will be `aaaaa`, since there is not other
-                // way to fill it without adding a number that forms no repetition
-                // e.g. 11112 isn't interesting for our purpose, since 2 "breaks" the repetitions
-                continue;
-            }
 
-            // finding divisors
-            size_t current = min;
-            for ( size_t div = 1; div <= current_digits; div++ ) {
-                if ( min_digits % div != 0 ) continue;
+        int max_first_digit = get_digits( max, min_digits, 1 );
+        int min_first_digit = get_digits( min, max_digits, 1 );
 
-                // now `div` is a divisor of current_digits
-                // on n digits, to get the first `div` (div < n) digits we must divide by 10 exactly n-m times.
-                for ( size_t j = 0; j < current_digits-div; j++ ) {
-                    current /= 10;
-                }
-
-                size_t composed = 0;
-                while ( true ) {
-                    for (size_t x = 0; x < current_digits; x+=current_digits/div) {
-                        composed += current*power(10, x); // ab, on, for example, 10 digits becomes: ababababab
-                    }
-                    if ( composed >  max) {
-                        break;
-                    }
-                    if ( composed > min ) {
-                        counter += composed;
-                    } 
-                }
-            }
-        }
+        for ( size_t i = 1; i < min;  )
 
         current = current->next;
     }
