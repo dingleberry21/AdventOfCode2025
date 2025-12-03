@@ -1,25 +1,25 @@
 #include <stdio.h>
 #include "../libs/Bnsparser.h"
 
-/* NOT WORKING */
-
 /* Day 3 of Avent of Code 2025 challenge. */
+/* Check day one to see what tokeniser I'm using (Bnsparser) */
 
 int main(void) {
-    FILE *fp = fopen( "Inputs/Problem2.txt", "r" );
+    FILE *fp = fopen( "Inputs/Problem3.txt", "r" );
     if ( !fp ) return -1;
 
     file *F = bnsreadf( fp );
-    if ( !F->first ) { // F can't be returns as nullptr anyways
+    if ( !F->first ) {
         return -1;
     }
-
+    
     line *current = F->first;
     int result = 0;
 
+    int max_joltage = 0;
     while ( current ) {
-        int max_joltage = 0;
-
+        max_joltage = 0;
+        printf("%zu\n", current->length);
         for ( unsigned int i = 0; i < current->length; i++ ) {            
             int d1 = current->buff[i] - '0';
 
@@ -29,13 +29,11 @@ int main(void) {
                 int current_joltage = 10 * d1 + d2;
                 
                 if ( current_joltage > max_joltage ) {
-                    printf("%i\n", current_joltage);
-                    result += current_joltage;
                     max_joltage = current_joltage;
                 }
             }
         }
-
+        result += max_joltage;
         current = current->next;
     }
 

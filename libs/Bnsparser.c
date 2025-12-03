@@ -93,6 +93,14 @@ file* File_new(line *first_line, size_t count) {
     return self;
 }
 
+bool validate_separator(char c, char *separators_string) {
+    for (size_t i = 0; i < strlen(separators_string); i++) { // better not make it fail, LMAO. Pray for it to have a null-terminator
+        if (c == separators_string[i]) return true;
+    }
+
+    return false;
+}
+
 file* bnsreadf(FILE *fp) {
     rewind(fp);
     size_t lines_count = 0;
@@ -156,14 +164,6 @@ file* bnsreadf(FILE *fp) {
     }
 
     return File_new(first_line, lines_count);
-}
-
-bool validate_separator(char c, char *separators_string) {
-    for (size_t i = 0; i < strlen(separators_string); i++) { // better not make it fail, LMAO. Pray for it to have a null-terminator
-        if (c == separators_string[i]) return true;
-    }
-
-    return false;
 }
 
 token** bnstokenise(line *ln, char *separators_string) {// Separators MUST be null terminated
