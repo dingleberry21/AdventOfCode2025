@@ -75,6 +75,7 @@ int main(void) {
     size_t max = 0; // INITIALLY stores the UPPER boundary of the range
     unsigned int min_digits = 0; // digits of the lower boundary
     unsigned int max_digits = 0; // digits of the upper boudary
+    size_t evaluations = 0;
     while (current) {
         token **subtokensbuff = subtokeniser(current, "-"); //always gives us 2 str tokens: min and max
         
@@ -126,6 +127,7 @@ int main(void) {
 
         // 5. We slowly increment start and "duplicate" it over to the other side. We work as if we were on the right one.
         size_t R = start; // used to save the right side and sum it when recomposing the full symmetric number
+        
         while (true) {
             if (min_digits % 2 != 0) { // we gotta skip uneven nums
                 min_digits++;
@@ -136,26 +138,28 @@ int main(void) {
             // notice we check also if it's greater than min, because we are not sure first ones really are.
             // E.g. min = 3234; start = 32; symmetric = 3232 < min
             size_t symmetric = R*power(10, min_digits/2) + R;
-            if (symmetric < max && symmetric > min) {
+            if ( symmetric > min && symmetric < max ) {
+                // printf("Caught: %zu\tMin: %zu\tMax: %zu\tMin digits: %u\n", symmetric, min, max, min_digits);
                 counter += symmetric ; // we have found a symmetric number that's in the range
-            } else if (symmetric < min) {
+                R++;
+            } else if ( symmetric < min ) {
                 R++;
                 continue;
-            } else {
+            } else if ( symmetric > max ) {
                 break;
             }
             
             // gradually updates `min_digits` by getting the amount of bits and subtracting the most significant zeroes,
             // then divides by log2(10) and casts to int to have an int, adds 1 to complete.
-            R++;
-            min_digits = (int)((sizeof(counter)*8 - __builtin_clzll(counter))/log2(10)) + 1;
+            symmetric = R*power(10, min_digits/2) + R;
+            min_digits = (int)((sizeof(symmetric)*8 - __builtin_clzll(counter))/log2(10)) + 1;
         }
 
         min = max = 0;
         current = current->next;
     }
 
-    printf("-------- INVALID CHARS COUNT --------\n%zu\n-------- END --------", counter);
-
+    printf("-------- INVALID CHARS COUNT --------\n%zu\n-------- END --------\n", counter);
+    printf("Evaluations: %zu\n", evaluations);
     return 0;
 }
